@@ -1,12 +1,28 @@
 import requests
 from bs4 import BeautifulSoup
+
+
+def get_all_best_sellers_100():
+    #Se recorren las paginas de los libros mas vendidos de la 1 a la 10
+        for page_number in range(0,11):
+            print('A continuación se muestran los libros de la página '+ str(page_number) + '\n')
+            datos = get_main_news(page_number)
+            
+            for libros_mas_vendidos in datos:
+                print('=================================')
+                print(libros_mas_vendidos)
+                print('=================================')
+                print('\n')
+            
+            
+        
 # La función get_main_news retornará un diccionario con todas las urls, títulos y autor de libros encontrados en la sección principal.
-def get_main_news():
-    url = 'https://www.todostuslibros.com/mas_vendidos?page=1'
+def get_main_news(page_number):
+    url = 'https://www.todostuslibros.com/mas_vendidos?page='+str(page_number)
 
     respuesta = launch_request(url)
 
-    contenido_web = BeautifulSoup(respuesta.text, 'lxml')
+    contenido_web = BeautifulSoup(respuesta.text, 'html.parser')
 
 # Buscar la etiqueta ul, que tenga la clase books, que es la lista que contiene todas las urls. 
     libreria = contenido_web.find('ul', attrs={'class':'books'})
@@ -42,11 +58,6 @@ def launch_request(url):
 
 
 if __name__ == '__main__':
-    datos = get_main_news()
+    get_all_best_sellers_100()
 
-	
-    for libros_mas_vendidos in datos:
-        print('=================================')
-        print(libros_mas_vendidos)
-        print('=================================')
 		
