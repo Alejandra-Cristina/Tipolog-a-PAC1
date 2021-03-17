@@ -4,19 +4,24 @@ import csv
 import os
 import pandas as pd
 
+
 def get_all_best_sellers_100():
     #Se recorren las paginas de los libros mas vendidos de la 1 a la 10
-        for page_number in range(0,11):
+        datos = []
+        for page_number in range(1,11):
             print('A continuación se muestran los libros de la página '+ str(page_number) + '\n')
-            datos = get_main_news(page_number)
+            actual_datos = get_main_news(page_number)
             
-            for libros_mas_vendidos in datos:
+            for libro_mas_vendidos in actual_datos:
+                datos.append(libro_mas_vendidos)
+                get_book_page_data(libro_mas_vendidos['url'])
                 print('=================================')
-                print(libros_mas_vendidos)
+                print(libro_mas_vendidos)
                 print('=================================')
                 print('\n')
                 
         return datos
+
             
             
         
@@ -46,6 +51,30 @@ def get_main_news(page_number):
     return datos
 
 
+#Consigue la informacion relativa a los libros: editorial, edicion ...
+#Esta informacion se alade a la ya obtenida de url, titulo y autor
+def get_book_page_data(book_url):
+    respuesta = launch_request(book_url)
+    
+    contenido_web = BeautifulSoup(respuesta.text, 'html.parser')
+      
+    data = {'materias': contenido_web.select_one('.materias a').get_text()}
+    
+    #Obtenemos las dos columnas de informacion con editorial, peso del libro y otros atributos
+    informacion_relativa_libro = contenido_web.select('.col-12.col-sm-12.col-md-12.col-lg-6 > .row')
+  
+    for informacion_relativa_libro_i in informacion_relativa_libro:
+        keys = informacion_relativa_libro_i.find_all('dt')
+        values = informacion_relativa_libro_i.find_all('dd')
+        
+        for i in range(0,len(keys)):
+            data[keys[i].get_text()] = values[i].get_text()
+            
+    
+    print(data)
+    return data
+        
+    
 def launch_request(url):
     try:
         respuesta = requests.get(
