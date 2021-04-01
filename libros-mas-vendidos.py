@@ -12,15 +12,14 @@ def get_all_best_sellers_100():
     
     data_100 = [];
     barrier = threading.Barrier(11)
-    lock = threading.Lock();
     
     for page_number in range(1,11):
-        x = threading.Thread(target=get_bestsellerspage, args=(page_number,data_100,barrier,lock))
+        x = threading.Thread(target=get_bestsellerspage, args=(page_number,data_100,barrier))
         x.start();
     barrier.wait()
     return data_100
 
-def get_bestsellerspage(page_number,data_100,barrier,lock):
+def get_bestsellerspage(page_number,data_100,barrier):
     url = 'https://www.todostuslibros.com/mas_vendidos?page='+str(page_number)
     respuesta = launch_request(url)
 
@@ -45,8 +44,6 @@ def get_bestsellerspage(page_number,data_100,barrier,lock):
             'autor': libro.select_one('.author > a').get_text().strip(),
             'materias': contenido_web.select_one('.materias a').get_text()
         }
-        
-        
         
         #Obtenemos las dos columnas de informacion acerca editorial, peso del libro y otros atributos
         informacion_relativa_libro = contenido_web.select('.col-12.col-sm-12.col-md-12.col-lg-6 > .row')
@@ -78,6 +75,7 @@ def launch_request(url):
         )
         respuesta.raise_for_status()
     except requests.exceptions.HTTPError as err:
+        print(err)
         raise SystemExit(err)
 
     return respuesta
