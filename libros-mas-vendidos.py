@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import threading
+import random
 import timeit
 import csv
 import os
@@ -38,11 +39,11 @@ def get_bestsellerspage(page_number,data_100,barrier):
         contenido_web = BeautifulSoup(respuesta.text, 'html.parser')
               
         datos = {
-            'puesto': puesto_del_libro,
-            'url': libro.find('h2').a.get('href'),
-            'titulo': libro.find('h2').get_text().strip(),
-            'autor': libro.select_one('.author > a').get_text().strip(),
-            'materias': contenido_web.select_one('.materias a').get_text()
+            'Puesto': puesto_del_libro,
+            'Url': libro.find('h2').a.get('href'),
+            'Título': libro.find('h2').get_text().strip(),
+            'Autor': libro.select_one('.author > a').get_text().strip(),
+            'Materias': contenido_web.select_one('.materias a').get_text()
         }
         
         #Obtenemos las dos columnas de informacion acerca editorial, peso del libro y otros atributos
@@ -53,7 +54,7 @@ def get_bestsellerspage(page_number,data_100,barrier):
             values = informacion_relativa_libro_i.find_all('dd')
 
             for i in range(0,len(keys)):
-                datos[keys[i].get_text()] = values[i].get_text()
+                datos[keys[i].get_text().replace(':','')] = values[i].get_text()
         
         #Evitamos condición de carrera ya que append es threadsafe porque es una operación atomica.
         data_100.append(datos)  
@@ -64,13 +65,21 @@ def get_bestsellerspage(page_number,data_100,barrier):
         #print('\n')
     barrier.wait();
    
-            
+def random_User_Agent():
+    userAgent_list = ['Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36',
+                      'Mozilla/5.0 (X11; CrOS x86_64 8172.45.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.64 Safari/537.36',
+                      'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36',
+                      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36']
+    aux_user = userAgent_list[random.randint(0, len(userAgent_list)-1)]
+    #print(aux_user)
+    return aux_user
+
 def launch_request(url):
     try:
         respuesta = requests.get(
             url,
             headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36'
+                'User-Agent': random_User_Agent()
             }
         )
         respuesta.raise_for_status()
