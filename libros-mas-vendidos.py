@@ -8,10 +8,16 @@ import os
 import pandas as pd
             
         
-# La función get_main_news retornará un diccionario con todas las urls, títulos y autor de libros encontrados en la sección principal.
+# La función get_all_best_sellers_100 retornará un diccionario con todas las urls, títulos, autor ... 
+# de los libros encontrados en la lista de más vendidos de la web todostuslibros.
+#
+# La seccion de los mas vendidos en todostuslibros esta formada por 10 paginas 
+#que se obtienen pasando un parametro page al subdominio de mas_vendidos
 def get_all_best_sellers_100():
     
     data_100 = [];
+    #El barrier esta para que 
+    #hasta que no se ha extraido la informacion de las 10 paginas que componen el ranking no se continue con la ejecución
     barrier = threading.Barrier(11)
     
     for page_number in range(1,11):
@@ -20,19 +26,20 @@ def get_all_best_sellers_100():
     barrier.wait()
     return data_100
 
+#Añade al diccionario data_100 los datos de los 10 libros de la pagina que se pasa como parametro
 def get_bestsellerspage(page_number,data_100,barrier):
     url = 'https://www.todostuslibros.com/mas_vendidos?page='+str(page_number)
     respuesta = launch_request(url)
-
+ 
     contenido_web = BeautifulSoup(respuesta.text, 'html.parser')
     libreria = contenido_web.find('ul', attrs={'class':'books'})
     libros = libreria.findChildren('div', attrs={'class':'book-details'})
 
-    # Después recorreremos la lista para obtener la url, el título, para ello usaremos el siguiente código:
+    #Recorreremos la lista con la informacion de los libros (libros) para obtener la url, el título ... :
     
     puesto_del_libro = (page_number-1) * 10
     for libro in libros:            
-        #Se suma uno al puesto del libro para que este listo para asignarse.
+        #Se suma uno al puesto del libro para que el valor esté actualizado.
         puesto_del_libro+=1;
         
         respuesta = launch_request(libro.find('h2').a.get('href'))
@@ -56,7 +63,7 @@ def get_bestsellerspage(page_number,data_100,barrier):
             for i in range(0,len(keys)):
                 datos[keys[i].get_text().replace(':','')] = values[i].get_text()
         
-        #Evitamos condición de carrera ya que append es threadsafe porque es una operación atomica.
+        #Evitamos una posible condición de carrera ya que append es threadsafe porque es una operación atomica.
         data_100.append(datos)  
         
         #print('=================================')
@@ -65,6 +72,7 @@ def get_bestsellerspage(page_number,data_100,barrier):
         #print('\n')
     barrier.wait();
    
+#Devuelve un user-agent "aleatorio" de la lista definida
 def random_User_Agent():
     userAgent_list = ['Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36',
                       'Mozilla/5.0 (X11; CrOS x86_64 8172.45.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.64 Safari/537.36',
@@ -74,6 +82,7 @@ def random_User_Agent():
     #print(aux_user)
     return aux_user
 
+#Realiza una peticion GET sobre la url que se pasa como parámetro
 def launch_request(url):
     try:
         respuesta = requests.get(
@@ -89,7 +98,10 @@ def launch_request(url):
 
     return respuesta
 
-
+#Funcion main
+#Se obtiene el diccionario con toda la info de los 100 libros mas vendidos
+#Se transforma en dataFrame y se genera un csv y xlsx
+#Se imprime el tiempo que tardo en ejecutarse
 if __name__ == '__main__':
     start = timeit.default_timer()
     
