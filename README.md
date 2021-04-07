@@ -18,3 +18,6 @@ La actividad ha sido realizada por Alejandra Cristina Marrero Suárez y Luis Mig
 
 * Subirats, L., Calvo, M. (2018). Web Scraping. Editorial UOC.
 * Lawson, R. (2015). Web Scraping with Python. Packt Publishing Ltd. Chapter 2. Scraping the Data
+
+### DOI
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4664583.svg)](https://doi.org/10.5281/zenodo.4664583)
